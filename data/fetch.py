@@ -44,7 +44,7 @@ for tag in tag:
             })
             time.sleep(0.5)
 
-with open("battles.json", "w") as f: 
+with open("data/battles.json", "w") as f: 
     json.dump(battles_data, f)
 
 try:

@@ -4,6 +4,7 @@ with open("data/battles.json", "r") as f:
     battles = json.load(f)
 
 training_data = []
+
 for battle in battles:
 
     team0 = battle["teams"][0]
@@ -12,9 +13,9 @@ for battle in battles:
     row1 = {
         "map":battle["map"],
         "mode": battle["mode"],
-        "your_picks": [team0[0]["brawler"]["name"]],
+        "your_picks": [team0[0]["brawler"]["id"]],
         "enemy_picks": [],
-        "next_pick": team1[0]["brawler"]["name"],
+        "next_pick": team1[0]["brawler"]["id"],
         "label": battle["result"]
     }
     training_data.append(row1)
@@ -22,9 +23,9 @@ for battle in battles:
     row2 = {
         "map":battle["map"],
         "mode": battle["mode"],
-        "your_picks": [team0[0]["brawler"]["name"]],
-        "enemy_picks": [team1[0]["brawler"]["name"]],
-        "next_pick": team1[1]["brawler"]["name"],
+        "your_picks": [team0[0]["brawler"]["id"]],
+        "enemy_picks": [team1[0]["brawler"]["id"]],
+        "next_pick": team1[1]["brawler"]["id"],
         "label": battle["result"]
     }
     training_data.append(row2)
@@ -32,9 +33,9 @@ for battle in battles:
     row3 = {
         "map":battle["map"],
         "mode": battle["mode"],
-        "your_picks": [team0[0]["brawler"]["name"]],
-        "enemy_picks": [team1[0]["brawler"]["name"], team1[1]["brawler"]["name"]],
-        "next_pick": team0[1]["brawler"]["name"],
+        "your_picks": [team0[0]["brawler"]["id"]],
+        "enemy_picks": [team1[0]["brawler"]["id"], team1[1]["brawler"]["id"]],
+        "next_pick": team0[1]["brawler"]["id"],
         "label": battle["result"]
     }
     training_data.append(row3)
@@ -42,9 +43,9 @@ for battle in battles:
     row4 = {
         "map":battle["map"],
         "mode": battle["mode"],
-        "your_picks": [team0[0]["brawler"]["name"],team0[1]["brawler"]["name"]],
-        "enemy_picks": [team1[0]["brawler"]["name"], team1[1]["brawler"]["name"]],
-        "next_pick": team0[2]["brawler"]["name"] ,
+        "your_picks": [team0[0]["brawler"]["id"],team0[1]["brawler"]["id"]],
+        "enemy_picks": [team1[0]["brawler"]["id"], team1[1]["brawler"]["id"]],
+        "next_pick": team0[2]["brawler"]["id"] ,
         "label": battle["result"]
     }
     training_data.append(row4)
@@ -52,9 +53,9 @@ for battle in battles:
     row5 = {
         "map":battle["map"],
         "mode": battle["mode"],
-        "your_picks": [team0[0]["brawler"]["name"],team0[1]["brawler"]["name"],team0[2]["brawler"]["name"]],
-        "enemy_picks": [team1[0]["brawler"]["name"], team1[1]["brawler"]["name"]],
-        "next_pick": team1[2]["brawler"]["name"] ,
+        "your_picks": [team0[0]["brawler"]["id"],team0[1]["brawler"]["id"],team0[2]["brawler"]["id"]],
+        "enemy_picks": [team1[0]["brawler"]["id"], team1[1]["brawler"]["id"]],
+        "next_pick": team1[2]["brawler"]["id"] ,
         "label": battle["result"]
     }
     training_data.append(row5)
@@ -62,14 +63,14 @@ for battle in battles:
     row6 = {
         "map":battle["map"],
         "mode": battle["mode"],
-        "your_picks": [team0[0]["brawler"]["name"],team0[1]["brawler"]["name"],team0[2]["brawler"]["name"]],
-        "enemy_picks": [team1[0]["brawler"]["name"], team1[1]["brawler"]["name"], team1[2]["brawler"]["name"]],
+        "your_picks": [team0[0]["brawler"]["id"],team0[1]["brawler"]["id"],team0[2]["brawler"]["id"]],
+        "enemy_picks": [team1[0]["brawler"]["id"], team1[1]["brawler"]["id"], team1[2]["brawler"]["id"]],
         "next_pick":[],
         "label": battle["result"]
     }
     training_data.append(row6)
 
-with open("training_data.json", "w") as f: 
+with open("data/training_data.json", "w") as f: 
     json.dump(training_data, f)
 print(f"saved {len(training_data)} training rows")
 
