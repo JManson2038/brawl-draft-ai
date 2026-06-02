@@ -1,7 +1,10 @@
 from fastapi import  FastAPI
 from pydantic import BaseModel
 import json
-
+import pickle
+import json
+import numpy as np
+from sklearn.preprocessing import LabelEncoder
 from data.augment import id_to_name
 
 class Draftstate(BaseModel):
