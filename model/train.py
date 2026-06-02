@@ -6,6 +6,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report
+import pickle
 
 with open("data/training_data.json", "r") as f:
         training_data = json.load(f)
@@ -49,9 +50,20 @@ rf_model = RandomForestClassifier()
 rf_model.fit(X_train, y_train)
 
 rf_preds = rf_model.predict(X_test)
-print("random forest accuracy:", accuracy_score(y_test, rf_preds))
-print(y.value_counts(normalize=True))
-print(classification_report(y_test, preds))
+
+
+with open("model/xgb_model.pkl", "wb") as f:
+    pickle.dump(model, f)
+
+print("model saved")
+
+with open("model/le_map.pkl", "wb") as f:
+    pickle.dump(le_map, f)
+
+with open("model/le_mode.pkl", "wb") as f:
+    pickle.dump(le_mode, f)
+
+print("encoders saved")
 
 if __name__== "__main__":
     with open("data/training_data.json", "r") as f:
