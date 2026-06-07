@@ -21,6 +21,8 @@ if __name__ == "__main__":
 
         team0 = battle["teams"][0]
         team1 = battle["teams"][1]
+        if len(team0) != 3 or len(team1) != 3:
+            continue
 
         row1 = {
             "map":battle["map"],

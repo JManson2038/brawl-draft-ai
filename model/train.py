@@ -40,7 +40,7 @@ y = df["label"]
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-model = XGBClassifier(scale_pos_weight=0.25)
+model = XGBClassifier(scale_pos_weight=0.5)
 model.fit(X_train, y_train)
 
 preds = model.predict(X_test)
@@ -70,3 +70,7 @@ if __name__== "__main__":
         training_data = json.load(f)
 
 
+print(classification_report(y_test, preds))
+
+print(y.value_counts(normalize=True))
+print(le_map.classes_)

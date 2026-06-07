@@ -6,19 +6,26 @@ import json
 from dotenv import load_dotenv
 load_dotenv()
 BRAWL_API_KEY = os.getenv("BRAWL_API_KEY")
-def fetch_data():
-    url = "https://api.brawlstars.com/v1/rankings/global/players?limit=200"
+def fetch_data(country="global"):
+    url = url = f"https://api.brawlstars.com/v1/rankings/{country}/players?limit=200"
     headers = {
         "Authorization": f"Bearer {BRAWL_API_KEY}"
     }
     response = requests.get(url, headers=headers)
     return response.json()
 
-data = fetch_data()
-
-tag=[player["tag"] for player in data["items"]]
 
 
+countries = ["global", "US", "BR", "DE", "FR", "KR", "TR", "RU", "ES", "PL", "MX"]
+tags = set()
+
+for country in countries:
+    data = fetch_data(country)
+    for player in data["items"]:
+        tags.add(player["tag"])
+
+tags = list(tags)
+print(f"collected {len(tags)} unique players")
 
 
 def fetch_player_battles(tag):
@@ -30,10 +37,13 @@ def fetch_player_battles(tag):
     response = requests.get(url, headers=headers)
     return response.json()
 
-#count = 0 
 battles_data = []
-for tag in tag:
+for tag in tags:
+    print(f"fetching battles for {tag}...")
     battles = fetch_player_battles(tag)
+    if "items" not in battles:
+        print(f"skipping {tag}: {battles}")
+        continue
     for battle in battles["items"]:
         if battle["battle"]["type"] == "ranked" and (battle["battle"]["mode"] in ["gemGrab", "brawlBall", "knockout", "hotZone"]):
             battles_data.append({ 
@@ -42,7 +52,7 @@ for tag in tag:
                 "result": battle["battle"]["result"],
                 "teams": battle["battle"]["teams"]
             })
-            time.sleep(0.5)
+    time.sleep(0.5)
 
 with open("data/battles.json", "w") as f: 
     json.dump(battles_data, f)
