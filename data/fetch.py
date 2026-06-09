@@ -41,10 +41,13 @@ battles_data = []
 for tag in tags:
     print(f"fetching battles for {tag}...")
     battles = fetch_player_battles(tag)
+   
     if "items" not in battles:
         print(f"skipping {tag}: {battles}")
         continue
     for battle in battles["items"]:
+        if battle["event"]["map"] is None:
+            continue
         if battle["battle"]["type"] == "ranked" and (battle["battle"]["mode"] in ["gemGrab", "brawlBall", "knockout", "hotZone"]):
             battles_data.append({ 
                 "mode": battle["battle"]["mode"],

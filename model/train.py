@@ -14,14 +14,23 @@ with open("data/training_data.json", "r") as f:
 def flatten_row(row:dict):
     your_picks = row["your_picks"] + [0] * (3 - len(row["your_picks"]))
     enemy_picks = row["enemy_picks"] + [0] * (3 - len(row["enemy_picks"]))
+    your_classes = row["your_pick_classes"] + ["none"] * (3 - len(row["your_pick_classes"]))
+    enemy_classes = row["enemy_pick_classes"] + ["none"] * (3 - len(row["enemy_pick_classes"]))
     return {
     "your_pick_1": your_picks[0],
     "your_pick_2": your_picks[1],
     "your_pick_3": your_picks[2],
+    "your_pick_1_class": your_classes[0],
+    "your_pick_2_class": your_classes[1],
+    "your_pick_3_class": your_classes[2],
     "enemy_pick_1": enemy_picks[0],
     "enemy_pick_2": enemy_picks[1],
     "enemy_pick_3": enemy_picks[2],
+    "enemy_pick_1_class": enemy_classes[0],
+    "enemy_pick_2_class": enemy_classes[1],
+    "enemy_pick_3_class": enemy_classes[2],
     "next_pick": row["next_pick"] if row["next_pick"] else 0,
+    "next_pick_class": row.get("next_pick_class", "none"),
     "map": row["map"],
     "mode": row["mode"],
     "label": 1 if row["label"] == "victory" else 0
@@ -34,6 +43,11 @@ le_mode = LabelEncoder()
 
 df["map"] = le_map.fit_transform(df["map"])
 df["mode"] = le_mode.fit_transform(df["mode"])
+
+class_cols = [c for c in df.columns if c.endswith("_class")]
+le_class = LabelEncoder()
+le_class.fit(pd.unique(df[class_cols].values.ravel()))
+df[class_cols] = df[class_cols].apply(lambda col: le_class.transform(col))
 
 X = df.drop(columns=["label"])
 y = df["label"]
@@ -62,6 +76,9 @@ with open("model/le_map.pkl", "wb") as f:
 
 with open("model/le_mode.pkl", "wb") as f:
     pickle.dump(le_mode, f)
+
+with open("model/le_class.pkl", "wb") as f:
+    pickle.dump(le_class, f)
 
 print("encoders saved")
 
