@@ -19,6 +19,11 @@ app = FastAPI()
 @app.post("/recommend")
 async def recommend(item: DraftState):
     used = item.your_picks + item.enemy_picks + item.your_bans + item.enemy_bans
+    all_picks = item.your_picks + item.enemy_picks
+    all_bans = item.your_bans + item.enemy_bans
+
+    if any(b in all_picks for b in all_bans):
+        return {"error": "A brawler cannot be both picked and banned"}
     available = [b for b in all_brawlers if b not in used]
 
     try:
