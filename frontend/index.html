@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brawl Draft AI</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#11131a;color:#e8eaf0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh}
+.wrap{max-width:1100px;margin:0 auto;padding:1rem}
+header{display:flex;align-items:center;justify-content:space-between;padding:.75rem 0 1.25rem;border-bottom:1px solid #2a2d3a;margin-bottom:1.25rem}
+.logo{font-size:17px;font-weight:600;color:#fff}.logo span{color:#f5a623}
+.cfg-row{display:flex;gap:10px;margin-bottom:1.25rem;flex-wrap:wrap}
+.cfg-group label{display:block;font-size:10px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
+.cfg-group select{font-size:13px;padding:6px 10px;border-radius:8px;border:1px solid #2a2d3a;background:#1c1f2b;color:#e8eaf0;min-width:150px;cursor:pointer}
+.bans-panel{background:#1c1f2b;border:1px solid #2a2d3a;border-radius:12px;padding:12px;margin-bottom:1.25rem}
+.bans-header{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.panel-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.pt-ban{color:#e74c3c}.pt-your{color:#2ecc71}.pt-enemy{color:#3498db}.pt-rec{color:#f5a623}
+.ban-row{display:flex;gap:6px;flex-wrap:wrap}
+.layout{display:grid;grid-template-columns:1fr 1fr 220px;gap:12px;margin-bottom:1.25rem}
+.panel{background:#1c1f2b;border:1px solid #2a2d3a;border-radius:12px;padding:12px}
+.slot-section-label{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#666;margin-bottom:6px}
+.slot-row{display:flex;gap:6px}
+.slot-wrap{display:flex;flex-direction:column;align-items:center;gap:3px}
+.slot{width:52px;height:52px;border-radius:10px;border:1.5px dashed #2a2d3a;background:#13161f;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;overflow:hidden}
+.slot:hover{border-color:#444}
+.slot.active{border-color:#2ecc71;background:#0d2318;box-shadow:0 0 0 2px #2ecc7130}
+.slot.enemy-active{border-color:#3498db;background:#0d1a23;box-shadow:0 0 0 2px #3498db30}
+.slot.ban-active{border-color:#e74c3c;background:#230d0d;box-shadow:0 0 0 2px #e74c3c30}
+.slot.filled{border-style:solid;border-color:#2a2d3a;background:#1c1f2b}
+.slot.ban-slot.filled{border-color:#5a1a1a;background:#1a1010}
+.slot img{width:36px;height:36px;border-radius:50%;object-fit:cover}
+.slot .sname{font-size:7px;font-weight:600;color:#ccc;text-align:center;line-height:1.2;padding:0 2px;margin-top:1px}
+.slot .empty-icon{font-size:20px;color:#2a2d3a}
+.slot.ban-slot .empty-icon{color:#3a2020}
+.slot-lbl{font-size:8px;color:#555;font-weight:500}
+.drag-over{border-color:#f5a623!important;background:#231d0a!important}
+.mode-bar{background:#13161f;border:1px solid #2a2d3a;border-radius:10px;padding:8px 10px;margin-bottom:1.25rem;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.mode-label{font-size:11px;color:#666}
+.mode-text{font-size:12px;font-weight:600;color:#f5a623}
+.rec-list{display:flex;flex-direction:column;gap:6px}
+.rec-item{display:flex;align-items:center;gap:8px;padding:8px;border-radius:8px;background:#13161f;border:1px solid #2a2d3a}
+.rec-item.rank-1{border-color:#f5a623}
+.rec-rank{font-size:11px;font-weight:700;width:16px;text-align:center}
+.rec-rank.r1{color:#f5a623}.rec-rank.r2{color:#aaa}.rec-rank.r3{color:#cd7f32}.rec-rank.r4,.rec-rank.r5{color:#555}
+.rec-img{width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid #2a2d3a}
+.rec-info{flex:1;min-width:0}
+.rec-name{font-size:12px;font-weight:600;color:#e8eaf0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rec-bar-wrap{height:3px;background:#2a2d3a;border-radius:2px;margin-top:3px}
+.rec-bar-fill{height:100%;border-radius:2px;background:#2ecc71;transition:width .4s}
+.rec-pct{font-size:11px;color:#888;white-space:nowrap}
+.rec-empty{font-size:12px;color:#555;text-align:center;padding:1rem 0}
+.err-msg{font-size:11px;color:#e74c3c;padding:4px 0}
+.rec-btn{width:100%;padding:8px;border-radius:8px;border:1px solid #f5a623;background:transparent;color:#f5a623;font-size:12px;font-weight:600;cursor:pointer;margin-bottom:10px}
+.rec-btn:hover{background:#231d0a}
+.rec-btn:disabled{opacity:.4;pointer-events:none}
+.grid-panel{background:#1c1f2b;border:1px solid #2a2d3a;border-radius:12px;padding:12px}
+.grid-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px}
+.grid-top-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#888}
+.search{font-size:12px;padding:5px 10px;border-radius:8px;border:1px solid #2a2d3a;background:#13161f;color:#e8eaf0;width:130px}
+.brawler-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(62px,1fr));gap:5px}
+.bc{padding:5px 3px;border-radius:8px;border:1px solid #2a2d3a;cursor:grab;text-align:center;background:#13161f;transition:all .1s;user-select:none}
+.bc:hover{background:#1c1f2b;border-color:#444}
+.bc.used{opacity:.2;pointer-events:none}
+.bc.dragging{opacity:.3}
+.bc img{width:36px;height:36px;border-radius:50%;object-fit:cover;display:block;margin:0 auto 2px;background:#2a2d3a;pointer-events:none}
+.bc .bn{font-size:8px;font-weight:600;color:#ccc;line-height:1.2;pointer-events:none}
+.bc .bcls{font-size:7px;color:#555;pointer-events:none}
+@media(max-width:700px){.layout{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="logo">Brawl <span>Draft AI</span></div>
+  <div style="font-size:11px;color:#555">Powered by XGBoost · Masters+ data</div>
+</header>
+
+<div class="cfg-row">
+  <div class="cfg-group"><label>Map</label>
+    <select id="map-sel" onchange="autoRec()">
+      <option>Sneaky Fields</option><option>Pinhole Punt</option><option>Backyard Bowl</option>
+      <option>Hard Rock Mine</option><option>Double Swoosh</option><option>Out in the Open</option>
+      <option>Chivalry</option><option>Open Business</option><option>Super Beach</option>
+      <option>Triple Dribble</option><option>Stardust Storm</option><option>Sunny Soccer</option>
+      <option>Grass Knot</option><option>Healthy Middle Ground</option>
+    </select>
+  </div>
+  <div class="cfg-group"><label>Mode</label>
+    <select id="mode-sel" onchange="autoRec()">
+      <option value="brawlBall">Brawl Ball</option>
+      <option value="gemGrab">Gem Grab</option>
+      <option value="knockout">Knockout</option>
+      <option value="hotZone">Hot Zone</option>
+    </select>
+  </div>
+</div>
+
+<div class="bans-panel">
+  <div class="bans-header">
+    <div class="panel-title pt-ban">Bans</div>
+    <div style="font-size:11px;color:#666">up to 6 total — click a ban slot to activate, click a brawler to ban</div>
+  </div>
+  <div class="ban-row" id="ban-row">
+    <div class="slot-wrap"><div class="slot ban-slot ban-active" data-t="ban" data-k="ban" data-i="0" onclick="slotClick(this)" ondragover="dOver(event,this)" ondragleave="dLeave(this)" ondrop="dDrop(event,this)"><i class="ti ti-ban empty-icon"></i></div><div class="slot-lbl">B1</div></div>
+    <div class="slot-wrap"><div class="slot ban-slot" data-t="ban" data-k="ban" data-i="1" onclick="slotClick(this)" ondragover="dOver(event,this)" ondragleave="dLeave(this)" ondrop="dDrop(event,this)"><i class="ti ti-ban empty-icon"></i></div><div class="slot-lbl">B2</div></div>
+    <div class="slot-wrap"><div class="slot ban-slot" data-t="ban" data-k="ban" data-i="2" onclick="slotClick(this)" ondragover="dOver(event,this)" ondragleave="dLeave(this)" ondrop="dDrop(event,this)"><i class="ti ti-ban empty-icon"></i></div><div class="slot-lbl">B3</div></div>
+    <div class="slot-wrap"><div class="slot ban-slot" data-t="ban" data-k="ban" data-i="3" onclick="slotClick(this)" ondragover="dOver(event,this)" ondragleave="dLeave(this)" ondrop="dDrop(event,this)"><i class="ti ti-ban empty-icon"></i></div><div class="slot-lbl">B4</div></div>
+    <div class="slot-wrap"><div class="slot ban-slot" data-t="ban" data-k="ban" data-i="4" onclick="slotClick(this)" ondragover="dOver(event,this)" ondragleave="dLeave(this)" ondrop="dDrop(event,this)"><i class="ti ti-ban empty-icon"></i></div><div class="slot-lbl">B5</div></div>
+    <div class="slot-wrap"><div class="slot ban-slot" data-t="ban" data-k="ban" data-i="5" onclick="slotClick(this)" ondragover="dOver(event,this)" ondragleave="dLeave(this)" ondrop="dDrop(event,this)"><i class="ti ti-ban empty-icon"></i></div><div class="slot-lbl">B6</div></div>
+  </div>
+</div>
+
+<div id="mode-bar" class="mode-bar">
+  <span class="mode-label">Adding to:</span>
+  <span class="mode-text" id="mode-text">bans — B1</span>
+  <span style="font-size:11px;color:#444;margin-left:auto">click slot to switch · click filled slot to remove</span>
+</div>
+
+<div class="layout">
+  <div class="panel">
+    <div class="panel-title pt-your" style="margin-bottom:10px">Your picks</div>
+    <div class="slot-row">
+      <div class="slot-wrap"><div class="slot" data-t="your" data-k="pick" data-i="0" onclick="slotClick(this)" ondragover="dOver(event,this)" ondragleave="dLeave(this)" ondrop="dDrop(event,this)"><i class="ti ti-plus empty-icon"></i></div><div class="slot-lbl">P1</div></div>
+      <div class="slot-wrap"><div class="slot" data-t="your" data-k="pick" data-i="1" onclick="slotClick(this)" ondragover="dOver(event,this)" ondragleave="dLeave(this)" ondrop="dDrop(event,this)"><i class="ti ti-plus empty-icon"></i></div><div class="slot-lbl">P2</div></div>
+      <div class="slot-wrap"><div class="slot" data-t="your" data-k="pick" data-i="2" onclick="slotClick(this)" ondragover="dOver(event,this)" ondragleave="dLeave(this)" ondrop="dDrop(event,this)"><i class="ti ti-plus empty-icon"></i></div><div class="slot-lbl">P3</div></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title pt-enemy" style="margin-bottom:10px">Enemy picks</div>
+    <div class="slot-row">
+      <div class="slot-wrap"><div class="slot" data-t="enemy" data-k="pick" data-i="0" onclick="slotClick(this)" ondragover="dOver(event,this)" ondragleave="dLeave(this)" ondrop="dDrop(event,this)"><i class="ti ti-plus empty-icon"></i></div><div class="slot-lbl">P1</div></div>
+      <div class="slot-wrap"><div class="slot" data-t="enemy" data-k="pick" data-i="1" onclick="slotClick(this)" ondragover="dOver(event,this)" ondragleave="dLeave(this)" ondrop="dDrop(event,this)"><i class="ti ti-plus empty-icon"></i></div><div class="slot-lbl">P2</div></div>
+      <div class="slot-wrap"><div class="slot" data-t="enemy" data-k="pick" data-i="2" onclick="slotClick(this)" ondragover="dOver(event,this)" ondragleave="dLeave(this)" ondrop="dDrop(event,this)"><i class="ti ti-plus empty-icon"></i></div><div class="slot-lbl">P3</div></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title pt-rec" style="margin-bottom:10px">Top picks</div>
+    <button class="rec-btn" id="rec-btn" onclick="getRecs()">Refresh</button>
+    <div class="rec-list" id="rec-list">
+      <div class="rec-empty">Loading...</div>
+    </div>
+  </div>
+</div>
+
+<div class="grid-panel">
+  <div class="grid-top">
+    <span class="grid-top-label">All brawlers — click or drag to slot</span>
+    <input class="search" id="search" placeholder="Search..." oninput="renderGrid()">
+  </div>
+  <div class="brawler-grid" id="bgrid"></div>
+</div>
+
+</div>
+
+<script>
+const CDN='https://cdn.brawlify.com/brawlers/borderless/';
+const BRAWLERS=[
+  {id:16000000,name:"Shelly",cls:"damage"},{id:16000001,name:"Colt",cls:"damage"},
+  {id:16000002,name:"Bull",cls:"tank"},{id:16000003,name:"Brock",cls:"marksman"},
+  {id:16000004,name:"Rico",cls:"damage"},{id:16000005,name:"Spike",cls:"damage"},
+  {id:16000006,name:"Barley",cls:"artillery"},{id:16000007,name:"Jessie",cls:"controller"},
+  {id:16000008,name:"Nita",cls:"damage"},{id:16000009,name:"Dynamike",cls:"artillery"},
+  {id:16000010,name:"El Primo",cls:"tank"},{id:16000011,name:"Mortis",cls:"assassin"},
+  {id:16000012,name:"Crow",cls:"assassin"},{id:16000013,name:"Poco",cls:"support"},
+  {id:16000014,name:"Bo",cls:"controller"},{id:16000015,name:"Piper",cls:"marksman"},
+  {id:16000016,name:"Pam",cls:"support"},{id:16000017,name:"Tara",cls:"damage"},
+  {id:16000018,name:"Darryl",cls:"tank"},{id:16000019,name:"Penny",cls:"artillery"},
+  {id:16000020,name:"Frank",cls:"tank"},{id:16000021,name:"Gene",cls:"controller"},
+  {id:16000022,name:"Tick",cls:"artillery"},{id:16000023,name:"Leon",cls:"assassin"},
+  {id:16000024,name:"Rosa",cls:"tank"},{id:16000025,name:"Carl",cls:"damage"},
+  {id:16000026,name:"Bibi",cls:"tank"},{id:16000027,name:"8-Bit",cls:"damage"},
+  {id:16000028,name:"Sandy",cls:"controller"},{id:16000029,name:"Bea",cls:"marksman"},
+  {id:16000030,name:"Emz",cls:"controller"},{id:16000031,name:"Mr. P",cls:"controller"},
+  {id:16000032,name:"Max",cls:"support"},{id:16000034,name:"Jacky",cls:"tank"},
+  {id:16000035,name:"Gale",cls:"controller"},{id:16000036,name:"Nani",cls:"marksman"},
+  {id:16000037,name:"Sprout",cls:"artillery"},{id:16000038,name:"Surge",cls:"damage"},
+  {id:16000039,name:"Colette",cls:"damage"},{id:16000040,name:"Amber",cls:"controller"},
+  {id:16000041,name:"Lou",cls:"controller"},{id:16000042,name:"Byron",cls:"support"},
+  {id:16000043,name:"Edgar",cls:"assassin"},{id:16000044,name:"Ruffs",cls:"support"},
+  {id:16000045,name:"Stu",cls:"assassin"},{id:16000046,name:"Belle",cls:"marksman"},
+  {id:16000047,name:"Squeak",cls:"controller"},{id:16000048,name:"Grom",cls:"artillery"},
+  {id:16000049,name:"Buzz",cls:"assassin"},{id:16000050,name:"Griff",cls:"controller"},
+  {id:16000051,name:"Ash",cls:"tank"},{id:16000052,name:"Meg",cls:"tank"},
+  {id:16000053,name:"Lola",cls:"damage"},{id:16000054,name:"Fang",cls:"assassin"},
+  {id:16000056,name:"Eve",cls:"damage"},{id:16000057,name:"Janet",cls:"marksman"},
+  {id:16000058,name:"Bonnie",cls:"marksman"},{id:16000059,name:"Otis",cls:"controller"},
+  {id:16000060,name:"Sam",cls:"assassin"},{id:16000061,name:"Gus",cls:"support"},
+  {id:16000062,name:"Buster",cls:"tank"},{id:16000063,name:"Chester",cls:"damage"},
+  {id:16000064,name:"Gray",cls:"support"},{id:16000065,name:"Mandy",cls:"marksman"},
+  {id:16000066,name:"R-T",cls:"damage"},{id:16000067,name:"Willow",cls:"controller"},
+  {id:16000068,name:"Maisie",cls:"marksman"},{id:16000069,name:"Hank",cls:"tank"},
+  {id:16000070,name:"Cordelius",cls:"assassin"},{id:16000071,name:"Doug",cls:"support"},
+  {id:16000072,name:"Pearl",cls:"damage"},{id:16000073,name:"Chuck",cls:"damage"},
+  {id:16000074,name:"Charlie",cls:"controller"},{id:16000075,name:"Mico",cls:"assassin"},
+  {id:16000076,name:"Kit",cls:"support"},{id:16000077,name:"Larry & Lawrie",cls:"artillery"},
+  {id:16000078,name:"Melodie",cls:"assassin"},{id:16000079,name:"Angelo",cls:"marksman"},
+  {id:16000080,name:"Draco",cls:"tank"},{id:16000081,name:"Lily",cls:"assassin"},
+  {id:16000082,name:"Berry",cls:"support"},{id:16000083,name:"Clancy",cls:"damage"},
+  {id:16000084,name:"Moe",cls:"damage"},{id:16000085,name:"Kenji",cls:"assassin"},
+  {id:16000086,name:"Shade",cls:"assassin"},{id:16000087,name:"Juju",cls:"artillery"},
+  {id:16000089,name:"Meeple",cls:"controller"},{id:16000090,name:"Ollie",cls:"tank"},
+  {id:16000091,name:"Lumi",cls:"damage"},{id:16000092,name:"Finx",cls:"controller"},
+  {id:16000093,name:"Jae-Yong",cls:"support"},{id:16000094,name:"Kaze",cls:"assassin"},
+  {id:16000095,name:"Alli",cls:"assassin"},{id:16000096,name:"Trunk",cls:"tank"},
+  {id:16000097,name:"Mina",cls:"damage"},{id:16000098,name:"Ziggy",cls:"controller"},
+  {id:16000099,name:"Pierce",cls:"marksman"},{id:16000100,name:"Gigi",cls:"assassin"},
+  {id:16000101,name:"Glowy",cls:"support"},{id:16000102,name:"Sirius",cls:"controller"},
+  {id:16000103,name:"Najia",cls:"damage"},{id:16000104,name:"Damian",cls:"tank"},
+  {id:16000105,name:"Starr Nova",cls:"assassin"}
+];
+
+const state={bans:[],yp:[],ep:[]};
+let activeEl=null;
+let recTimer=null;
+
+function sk(t,k){
+  if(t==='ban')return'bans';
+  if(t==='your')return'yp';
+  return'ep';
+}
+
+function used(){return[...state.bans,...state.yp,...state.ep];}
+
+function slotLabel(s){
+  const t=s.dataset.t,i=parseInt(s.dataset.i)+1;
+  if(t==='ban')return`bans — B${i}`;
+  if(t==='your')return`your picks — P${i}`;
+  return`enemy picks — P${i}`;
+}
+
+function setActive(s){
+  document.querySelectorAll('.slot.active,.slot.enemy-active,.slot.ban-active').forEach(x=>{
+    x.classList.remove('active','enemy-active','ban-active');
+  });
+  if(!s)return;
+  if(s.dataset.t==='ban')s.classList.add('ban-active');
+  else if(s.dataset.t==='your')s.classList.add('active');
+  else s.classList.add('enemy-active');
+  activeEl=s;
+  document.getElementById('mode-text').textContent=slotLabel(s);
+}
+
+function slotClick(s){
+  if(s.classList.contains('filled'))removeSlot(s);
+  else setActive(s);
+}
+
+function removeSlot(s){
+  const id=parseInt(s.dataset.bid);
+  if(!id)return;
+  const k=sk(s.dataset.t,s.dataset.k);
+  state[k]=state[k].filter(x=>x!==id);
+  s.classList.remove('filled');
+  s.dataset.bid='';
+  const icon=s.dataset.t==='ban'?'ti-ban':'ti-plus';
+  s.innerHTML=`<i class="ti ${icon} empty-icon"></i>`;
+  setActive(s);
+  renderGrid();
+  autoRec();
+}
+
+function place(slotEl,id){
+  const nid=Number(id);
+  const k=sk(slotEl.dataset.t,slotEl.dataset.k);
+  const limit=k==='bans'?6:3;
+  if(state[k].length>=limit)return false;
+  // only block picks from using already-picked brawlers (bans can be shared)
+  const blocked=k==='bans'?[...state.yp,...state.ep]:[...state.yp,...state.ep,...state.bans];
+  if(blocked.map(Number).includes(nid))return false;
+  state[k].push(nid);
+  const b=BRAWLERS.find(x=>x.id===nid);
+  slotEl.innerHTML=b?`<img src="${CDN+nid+'.png'}" alt="${b.name}"><div class="sname">${b.name}</div>`:'';
+  slotEl.classList.add('filled');
+  slotEl.dataset.bid=nid;
+  slotEl.classList.remove('active','enemy-active','ban-active','drag-over');
+  renderGrid();
+  advance();
+  autoRec();
+  return true;
+}
+
+function advance(){
+  const empty=[...document.querySelectorAll('.slot:not(.filled)')];
+  if(empty.length>0)setActive(empty[0]);
+  else{activeEl=null;document.getElementById('mode-text').textContent='all slots filled';}
+}
+
+function addBrawler(id){
+  if(!activeEl||activeEl.classList.contains('filled'))return;
+  place(activeEl,id);
+}
+
+function dOver(e,s){e.preventDefault();if(!s.classList.contains('filled'))s.classList.add('drag-over');}
+function dLeave(s){s.classList.remove('drag-over');}
+function dDrop(e,s){
+  e.preventDefault();
+  s.classList.remove('drag-over');
+  const id=e.dataTransfer.getData('text/plain');
+  if(!id||s.classList.contains('filled'))return;
+  setActive(s);
+  place(s,id);
+}
+
+function renderGrid(){
+  const q=(document.getElementById('search').value||'').toLowerCase();
+  const u=used().map(Number);
+  document.getElementById('bgrid').innerHTML=BRAWLERS.filter(b=>!q||b.name.toLowerCase().includes(q)).map(b=>`
+    <div class="bc${u.includes(b.id)?' used':''}"
+      onclick="addBrawler(${b.id})"
+      draggable="true"
+      ondragstart="event.dataTransfer.setData('text/plain','${b.id}');this.classList.add('dragging')"
+      ondragend="this.classList.remove('dragging')">
+      <img src="${CDN+b.id+'.png'}" alt="${b.name}">
+      <div class="bn">${b.name}</div>
+      <div class="bcls">${b.cls}</div>
+    </div>
+  `).join('');
+}
+
+function autoRec(){
+  clearTimeout(recTimer);
+  recTimer=setTimeout(getRecs,300);
+}
+
+async function getRecs(){
+  const btn=document.getElementById('rec-btn');
+  const list=document.getElementById('rec-list');
+  btn.disabled=true;
+  try{
+    const res=await fetch('http://127.0.0.1:8000/recommend',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        map:document.getElementById('map-sel').value,
+        mode:document.getElementById('mode-sel').value,
+        your_picks:state.yp,
+        enemy_picks:state.ep,
+        your_bans:state.bans,
+        enemy_bans:[]
+      })
+    });
+    const data=await res.json();
+    if(data.error){
+      list.innerHTML=`<div class="err-msg">${data.error}</div>`;
+    } else {
+      const ranks=['r1','r2','r3','r4','r5'];
+      list.innerHTML=data.recommendations.map((r,i)=>{
+        const b=BRAWLERS.find(x=>x.name.toUpperCase()===r.brawler);
+        const pct=Math.round(r.win_prob*100);
+        return`<div class="rec-item${i===0?' rank-1':''}">
+          <div class="rec-rank ${ranks[i]}">#${i+1}</div>
+          ${b?`<img class="rec-img" src="${CDN+b.id+'.png'}" alt="${r.brawler}">`:''}
+          <div class="rec-info">
+            <div class="rec-name">${r.brawler}</div>
+            <div class="rec-bar-wrap"><div class="rec-bar-fill" style="width:${pct}%"></div></div>
+          </div>
+          <div class="rec-pct">${pct}%</div>
+        </div>`;
+      }).join('');
+    }
+  } catch(e){
+    list.innerHTML='<div class="rec-empty" style="font-size:11px;color:#e74c3c">Server offline — run uvicorn backend.main:app --reload</div>';
+  }
+  btn.disabled=false;
+}
+
+renderGrid();
+setActive(document.querySelector('.slot'));
+getRecs();
+</script>
+</body>
+</html>

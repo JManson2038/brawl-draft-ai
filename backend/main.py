@@ -5,6 +5,8 @@ import pickle
 import numpy as np
 from sklearn.preprocessing import LabelEncoder
 import pandas as pd
+from fastapi.middleware.cors import CORSMiddleware
+
 
 class DraftState(BaseModel):
     map: str
@@ -15,6 +17,12 @@ class DraftState(BaseModel):
     enemy_bans: list
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.post("/recommend")
 async def recommend(item: DraftState):
