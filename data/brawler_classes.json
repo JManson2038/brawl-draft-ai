@@ -101,5 +101,6 @@
   "16000102": "controller",
   "16000103": "damage_dealer",
   "16000104": "tank",
-  "16000105": "assassin"
+  "16000105": "assassin",
+  "16000106": "tank"
 }
