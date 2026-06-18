@@ -11,15 +11,19 @@ body{background:#11131a;color:#e8eaf0;font-family:-apple-system,BlinkMacSystemFo
 .wrap{max-width:1100px;margin:0 auto;padding:1rem}
 header{display:flex;align-items:center;justify-content:space-between;padding:.75rem 0 1.25rem;border-bottom:1px solid #2a2d3a;margin-bottom:1.25rem}
 .logo{font-size:17px;font-weight:600;color:#fff}.logo span{color:#f5a623}
-.cfg-row{display:flex;gap:10px;margin-bottom:1.25rem;flex-wrap:wrap}
+.hdr-btns{display:flex;align-items:center;gap:8px}
+.hdr-btn{font-size:12px;padding:5px 12px;border-radius:8px;border:1px solid #2a2d3a;background:transparent;color:#888;cursor:pointer;transition:all .15s}
+.hdr-btn:hover{border-color:#555;color:#e8eaf0}
+.cfg-row{display:flex;gap:10px;margin-bottom:1.25rem;flex-wrap:wrap;align-items:flex-end}
 .cfg-group label{display:block;font-size:10px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
+.cfg-input{font-size:13px;padding:6px 10px;border-radius:8px;border:1px solid #2a2d3a;background:#1c1f2b;color:#e8eaf0;min-width:180px;cursor:pointer}
 .cfg-group select{font-size:13px;padding:6px 10px;border-radius:8px;border:1px solid #2a2d3a;background:#1c1f2b;color:#e8eaf0;min-width:150px;cursor:pointer}
 .bans-panel{background:#1c1f2b;border:1px solid #2a2d3a;border-radius:12px;padding:12px;margin-bottom:1.25rem}
 .bans-header{display:flex;align-items:center;gap:8px;margin-bottom:10px}
 .panel-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em}
 .pt-ban{color:#e74c3c}.pt-your{color:#2ecc71}.pt-enemy{color:#3498db}.pt-rec{color:#f5a623}
 .ban-row{display:flex;gap:6px;flex-wrap:wrap}
-.layout{display:grid;grid-template-columns:1fr 1fr 220px;gap:12px;margin-bottom:1.25rem}
+.layout{display:grid;grid-template-columns:1fr auto 1fr 220px;gap:8px;margin-bottom:1.25rem;align-items:start}
 .panel{background:#1c1f2b;border:1px solid #2a2d3a;border-radius:12px;padding:12px}
 .slot-section-label{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#666;margin-bottom:6px}
 .slot-row{display:flex;gap:6px}
@@ -37,6 +41,9 @@ header{display:flex;align-items:center;justify-content:space-between;padding:.75
 .slot.ban-slot .empty-icon{color:#3a2020}
 .slot-lbl{font-size:8px;color:#555;font-weight:500}
 .drag-over{border-color:#f5a623!important;background:#231d0a!important}
+.swap-col{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding-top:28px}
+.swap-btn{font-size:11px;padding:6px 10px;border-radius:8px;border:1px solid #2a2d3a;background:transparent;color:#888;cursor:pointer;transition:all .15s;white-space:nowrap}
+.swap-btn:hover{border-color:#f5a623;color:#f5a623}
 .mode-bar{background:#13161f;border:1px solid #2a2d3a;border-radius:10px;padding:8px 10px;margin-bottom:1.25rem;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .mode-label{font-size:11px;color:#666}
 .mode-text{font-size:12px;font-weight:600;color:#f5a623}
@@ -68,7 +75,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:.75
 .bc img{width:36px;height:36px;border-radius:50%;object-fit:cover;display:block;margin:0 auto 2px;background:#2a2d3a;pointer-events:none}
 .bc .bn{font-size:8px;font-weight:600;color:#ccc;line-height:1.2;pointer-events:none}
 .bc .bcls{font-size:7px;color:#555;pointer-events:none}
-@media(max-width:700px){.layout{grid-template-columns:1fr}}
+@media(max-width:800px){.layout{grid-template-columns:1fr 1fr}.swap-col{display:none}}
 </style>
 </head>
 <body>
@@ -76,21 +83,37 @@ header{display:flex;align-items:center;justify-content:space-between;padding:.75
 
 <header>
   <div class="logo">Brawl <span>Draft AI</span></div>
-  <div style="font-size:11px;color:#555">Powered by XGBoost · Masters+ data</div>
+  <div class="hdr-btns">
+    <div style="font-size:11px;color:#555">XGBoost · Masters+ data</div>
+    <button class="hdr-btn" onclick="resetDraft()">Reset draft</button>
+  </div>
 </header>
 
 <div class="cfg-row">
   <div class="cfg-group"><label>Map</label>
-    <select id="map-sel" onchange="autoRec()">
-      <option>Sneaky Fields</option><option>Pinhole Punt</option><option>Backyard Bowl</option>
-      <option>Hard Rock Mine</option><option>Double Swoosh</option><option>Out in the Open</option>
-      <option>Chivalry</option><option>Open Business</option><option>Super Beach</option>
-      <option>Triple Dribble</option><option>Stardust Storm</option><option>Sunny Soccer</option>
-      <option>Grass Knot</option><option>Healthy Middle Ground</option>
-    </select>
+    <input class="cfg-input" id="map-search" list="map-list" placeholder="Search map..." oninput="autoRec()" value="Sneaky Fields">
+    <datalist id="map-list">
+      <option>Abracadabra</option><option>Ancestral Roots</option><option>Arabesque</option>
+      <option>Backyard Bowl</option><option>Beach Ball</option><option>Belle's Rock</option>
+      <option>Below Zero</option><option>Bouncy Bowl</option><option>Cabin Fever</option>
+      <option>Chivalry</option><option>Crab Claws</option><option>Crystal Arcade</option>
+      <option>Deep Diner</option><option>Double Swoosh</option><option>Dueling Beetles</option>
+      <option>Field Goal</option><option>Flaring Phoenix</option><option>From Dusk till Dawn</option>
+      <option>Galaxy Arena</option><option>Gem Fort</option><option>Goldarm Gulch</option>
+      <option>Grass Knot</option><option>Hard Rock Mine</option><option>Healthy Middle Ground</option>
+      <option>Hyacinth House</option><option>Hyperspace</option><option>Konnakol</option>
+      <option>Match 1123581321</option><option>New Perspective</option><option>Nutmeg</option>
+      <option>Open Business</option><option>Opening Move</option><option>Out in the Open</option>
+      <option>Parallel Plays</option><option>Picturesque</option><option>Pinball Dreams</option>
+      <option>Pinhole Punt</option><option>Pinned Down</option><option>Puddle Splash</option>
+      <option>Sidetrack</option><option>Slippery Showdown</option><option>Sneaky Fields</option>
+      <option>Spiraling Out</option><option>Stardust Storm</option><option>Street Brawler 2</option>
+      <option>Sunny Soccer</option><option>Super Beach</option><option>Super Center</option>
+      <option>Tip Toe</option><option>Triple Dribble</option><option>Whisper Vale</option>
+    </datalist>
   </div>
   <div class="cfg-group"><label>Mode</label>
-    <select id="mode-sel" onchange="autoRec()">
+    <select class="cfg-input" id="mode-sel" onchange="autoRec()">
       <option value="brawlBall">Brawl Ball</option>
       <option value="gemGrab">Gem Grab</option>
       <option value="knockout">Knockout</option>
@@ -102,9 +125,9 @@ header{display:flex;align-items:center;justify-content:space-between;padding:.75
 <div class="bans-panel">
   <div class="bans-header">
     <div class="panel-title pt-ban">Bans</div>
-    <div style="font-size:11px;color:#666">up to 6 total — click a ban slot to activate, click a brawler to ban</div>
+    <div style="font-size:11px;color:#666">up to 6 total</div>
   </div>
-  <div class="ban-row" id="ban-row">
+  <div class="ban-row">
     <div class="slot-wrap"><div class="slot ban-slot ban-active" data-t="ban" data-k="ban" data-i="0" onclick="slotClick(this)" ondragover="dOver(event,this)" ondragleave="dLeave(this)" ondrop="dDrop(event,this)"><i class="ti ti-ban empty-icon"></i></div><div class="slot-lbl">B1</div></div>
     <div class="slot-wrap"><div class="slot ban-slot" data-t="ban" data-k="ban" data-i="1" onclick="slotClick(this)" ondragover="dOver(event,this)" ondragleave="dLeave(this)" ondrop="dDrop(event,this)"><i class="ti ti-ban empty-icon"></i></div><div class="slot-lbl">B2</div></div>
     <div class="slot-wrap"><div class="slot ban-slot" data-t="ban" data-k="ban" data-i="2" onclick="slotClick(this)" ondragover="dOver(event,this)" ondragleave="dLeave(this)" ondrop="dDrop(event,this)"><i class="ti ti-ban empty-icon"></i></div><div class="slot-lbl">B3</div></div>
@@ -128,6 +151,12 @@ header{display:flex;align-items:center;justify-content:space-between;padding:.75
       <div class="slot-wrap"><div class="slot" data-t="your" data-k="pick" data-i="1" onclick="slotClick(this)" ondragover="dOver(event,this)" ondragleave="dLeave(this)" ondrop="dDrop(event,this)"><i class="ti ti-plus empty-icon"></i></div><div class="slot-lbl">P2</div></div>
       <div class="slot-wrap"><div class="slot" data-t="your" data-k="pick" data-i="2" onclick="slotClick(this)" ondragover="dOver(event,this)" ondragleave="dLeave(this)" ondrop="dDrop(event,this)"><i class="ti ti-plus empty-icon"></i></div><div class="slot-lbl">P3</div></div>
     </div>
+  </div>
+
+  <div class="swap-col">
+    <button class="swap-btn" onclick="swapPick(0)" title="Swap P1">⇄ P1</button>
+    <button class="swap-btn" onclick="swapPick(1)" title="Swap P2">⇄ P2</button>
+    <button class="swap-btn" onclick="swapPick(2)" title="Swap P3">⇄ P3</button>
   </div>
 
   <div class="panel">
@@ -212,7 +241,7 @@ const BRAWLERS=[
   {id:16000099,name:"Pierce",cls:"marksman"},{id:16000100,name:"Gigi",cls:"assassin"},
   {id:16000101,name:"Glowy",cls:"support"},{id:16000102,name:"Sirius",cls:"controller"},
   {id:16000103,name:"Najia",cls:"damage"},{id:16000104,name:"Damian",cls:"tank"},
-  {id:16000105,name:"Starr Nova",cls:"assassin"}
+  {id:16000105,name:"Starr Nova",cls:"assassin"},{id:16000106,name:"Bolt",cls:"tank"}
 ];
 
 const state={bans:[],yp:[],ep:[]};
@@ -265,24 +294,62 @@ function removeSlot(s){
   autoRec();
 }
 
+function fillSlotEl(slotEl, id){
+  const b=BRAWLERS.find(x=>x.id===id);
+  slotEl.innerHTML=b?`<img src="${CDN+id+'.png'}" alt="${b.name}"><div class="sname">${b.name}</div>`:'';
+  slotEl.classList.add('filled');
+  slotEl.dataset.bid=id;
+  slotEl.classList.remove('active','enemy-active','ban-active','drag-over');
+}
+
+function clearSlotEl(slotEl){
+  slotEl.classList.remove('filled');
+  slotEl.dataset.bid='';
+  const icon=slotEl.dataset.t==='ban'?'ti-ban':'ti-plus';
+  slotEl.innerHTML=`<i class="ti ${icon} empty-icon"></i>`;
+}
+
 function place(slotEl,id){
   const nid=Number(id);
   const k=sk(slotEl.dataset.t,slotEl.dataset.k);
   const limit=k==='bans'?6:3;
   if(state[k].length>=limit)return false;
-  // only block picks from using already-picked brawlers (bans can be shared)
   const blocked=k==='bans'?[...state.yp,...state.ep]:[...state.yp,...state.ep,...state.bans];
   if(blocked.map(Number).includes(nid))return false;
   state[k].push(nid);
-  const b=BRAWLERS.find(x=>x.id===nid);
-  slotEl.innerHTML=b?`<img src="${CDN+nid+'.png'}" alt="${b.name}"><div class="sname">${b.name}</div>`:'';
-  slotEl.classList.add('filled');
-  slotEl.dataset.bid=nid;
-  slotEl.classList.remove('active','enemy-active','ban-active','drag-over');
+  fillSlotEl(slotEl,nid);
   renderGrid();
   advance();
   autoRec();
   return true;
+}
+
+function swapPick(idx){
+  const yid=state.yp[idx];
+  const eid=state.ep[idx];
+  if(!yid&&!eid)return;
+  state.yp[idx]=eid||undefined;
+  state.ep[idx]=yid||undefined;
+  state.yp=state.yp.filter(x=>x!==undefined);
+  state.ep=state.ep.filter(x=>x!==undefined);
+  syncSlotsFromState();
+  renderGrid();
+  autoRec();
+}
+
+function syncSlotsFromState(){
+  ['your','enemy'].forEach(t=>{
+    const arr=t==='your'?state.yp:state.ep;
+    for(let i=0;i<3;i++){
+      const s=document.querySelector(`.slot[data-t="${t}"][data-i="${i}"]`);
+      if(!s)continue;
+      if(arr[i]!==undefined){
+        fillSlotEl(s,arr[i]);
+      } else {
+        clearSlotEl(s);
+      }
+    }
+  });
 }
 
 function advance(){
@@ -294,6 +361,14 @@ function advance(){
 function addBrawler(id){
   if(!activeEl||activeEl.classList.contains('filled'))return;
   place(activeEl,id);
+}
+
+function resetDraft(){
+  state.bans=[];state.yp=[];state.ep=[];
+  document.querySelectorAll('.slot.filled').forEach(s=>clearSlotEl(s));
+  renderGrid();
+  setActive(document.querySelector('.slot'));
+  getRecs();
 }
 
 function dOver(e,s){e.preventDefault();if(!s.classList.contains('filled'))s.classList.add('drag-over');}
@@ -337,7 +412,7 @@ async function getRecs(){
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
-        map:document.getElementById('map-sel').value,
+        map:document.getElementById('map-search').value,
         mode:document.getElementById('mode-sel').value,
         your_picks:state.yp,
         enemy_picks:state.ep,
